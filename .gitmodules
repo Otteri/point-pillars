@@ -1,0 +1,18 @@
+[submodule "PointPillars_MultiHead_40FPS"]
+	path = PointPillars_MultiHead_40FPS
+	url = https://github.com/hova88/PointPillars_MultiHead_40FPS.git
+[submodule "onnx-tensorrt"]
+	path = onnx-tensorrt
+	url = https://github.com/onnx/onnx-tensorrt.git
+[submodule "OpenPCDet"]
+	path = OpenPCDet
+	url = https://github.com/hova88/OpenPCDet.git
+[submodule "spconv"]
+	path = spconv
+	url = https://github.com/traveller59/spconv.git
+[submodule "TensorRT"]
+	path = TensorRT
+	url = https://github.com/nvidia/TensorRT
+[submodule "protobuf"]
+	path = protobuf
+	url = https://github.com/protocolbuffers/protobuf.git
