@@ -10,6 +10,8 @@ docker-launch: ## Launch interactive docker container
 build: ## Build all submodules and PointPillars
 	${MAKE} setup
 	${MAKE} build-spconv
+	${MAKE} build-openpcdet
+	${MAKE} build-protobuf
 
 build-spconv: ## Build spconv (3rd party dependency)
 	cd ./spconv; \
