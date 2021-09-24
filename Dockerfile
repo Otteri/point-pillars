@@ -53,7 +53,7 @@ COPY OpenPCDet /app/OpenPCDet/
 COPY spconv /app/spconv/
 COPY onnx-tensorrt /app/onnx-tensorrt/
 COPY TensorRT /app/TensorRT/
-COPY protobuf /app/protobuf/
+#COPY protobuf /app/protobuf/
 COPY Makefile /app/Makefile
 COPY .git/ /app/.git
 COPY .gitmodules /app/.gitmodules
