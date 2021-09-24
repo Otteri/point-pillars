@@ -13,6 +13,3 @@
 [submodule "TensorRT"]
 	path = TensorRT
 	url = https://github.com/nvidia/TensorRT
-[submodule "protobuf"]
-	path = protobuf
-	url = https://github.com/protocolbuffers/protobuf.git
