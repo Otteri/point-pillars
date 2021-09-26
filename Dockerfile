@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --assume-yes \
     libboost-all-dev \
     libssl-dev \
     libtool \
+    libyaml-cpp-dev \
     make \
     python3-pip \
     python3-setuptools \
@@ -81,6 +82,8 @@ RUN cd /app/TensorRT/third_party/protobuf \
     && make -j$(nproc) \
     && make check \
     && make install \
+    && cp /app/TensorRT-7.1.3.4/include/* /usr/include/ \
+    && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/TensorRT-7.1.3.4/lib \
     && ldconfig
 
 # Build onnx-tenssort, so we can generate trt-models
@@ -92,14 +95,24 @@ RUN cd /app/onnx-tensorrt \
 
 # Make onnx2trt findable from anywhere
 ENV PATH "$PATH:/usr/local/bin"
+ENV LD_LIBRARY_PATH="/app/TensorRT-7.1.3.4/lib:${LD_LIBRARY_PATH}"
 
 # Copy project related sources
-COPY PointPillars_MultiHead_40FPS /app/PointPillars_MultiHead_40FPS/
+#COPY PointPillars_MultiHead_40FPS /app/PointPillars_MultiHead_40FPS/
 COPY OpenPCDet /app/OpenPCDet/
 COPY spconv /app/spconv/
 COPY Makefile /app/Makefile
 
+# For some reason OpenPCDet needs .git:
+# /app/OpenPCDet/tools/onnx_utils# python3 trans_pfe.py
+# fatal: not a git repository: /app/OpenPCDet/../.git/modules/OpenPCDet
+COPY .git /app/.git/
+
 # Build sources
 #RUN cd /app && make build
+
+# AS a last thing, the project
+# So when we do changes here, we need to redo only one layer
+COPY PointPillars_MultiHead_40FPS /app/PointPillars_MultiHead_40FPS/
 
 WORKDIR /app
