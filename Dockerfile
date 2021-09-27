@@ -14,6 +14,7 @@ FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04 AS base
 SHELL ["/bin/bash", "-c"]
 
 # Install common build tools
+# --assume-yes for git
 RUN apt-get update && apt-get install -y --no-install-recommends --assume-yes \
     autoconf \
     automake \
@@ -97,6 +98,16 @@ RUN cd /app/onnx-tensorrt \
 ENV PATH "$PATH:/usr/local/bin"
 ENV LD_LIBRARY_PATH="/app/TensorRT-7.1.3.4/lib:${LD_LIBRARY_PATH}"
 
+# Install ROS melodic on Ubuntu (http://wiki.ros.org/melodic/Installation/Ubuntu)
+RUN /bin/sh -c echo 'Etc/UTC' > /etc/timezone &&     ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &&     apt-get update &&     apt-get install -q -y --no-install-recommends tzdata &&     rm -rf /var/lib/apt/lists/*
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV ROS_DISTRO=melodic
+RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros-latest.list'
+RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+RUN apt-get update && apt-get install -y --no-install-recommends ros-melodic-ros-base
+RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+
 # Copy project related sources
 #COPY PointPillars_MultiHead_40FPS /app/PointPillars_MultiHead_40FPS/
 COPY OpenPCDet /app/OpenPCDet/
@@ -107,6 +118,9 @@ COPY Makefile /app/Makefile
 # /app/OpenPCDet/tools/onnx_utils# python3 trans_pfe.py
 # fatal: not a git repository: /app/OpenPCDet/../.git/modules/OpenPCDet
 COPY .git /app/.git/
+
+# Run separately for better caching
+RUN cd /app && make build-spconv
 
 # Build sources
 #RUN cd /app && make build
