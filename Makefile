@@ -13,6 +13,8 @@ docker-launch: ## Launch interactive docker container with display
 	--gpus all \
 	-it \
 	-v `pwd`/model:/app/model/ \
+	-v `pwd`/PointPillars_MultiHead_40FPS:/app/PointPillars_MultiHead_40FPS/ \
+	--network=host \
 	pointpillars
 
 build: ## Build all submodules and PointPillars
