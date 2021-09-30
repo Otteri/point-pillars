@@ -1,5 +1,5 @@
 BoxFeature: 7
-ScoreThreshold: 0.1
+ScoreThreshold: 0.2
 NmsOverlapThreshold: 0.2
 UseOnnx: false
 

@@ -5,7 +5,7 @@
     <arg name="lidar_topic"                   default="/lidar_points_rectified"/>
 
     <!-- Outputs topics -->
-    <arg name="pointcloud_topic"               default="/lidar_points_rectified"/>
+    <arg name="pointcloud_topic"               default="/lidar/detection_cloud"/>
     <arg name="detection_topic"                default="/lidar/detections"/>
 
     <arg name="frame"                          default="/base_link"/>
