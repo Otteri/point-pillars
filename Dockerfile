@@ -108,8 +108,10 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt
 RUN apt-get update && apt-get install -y --no-install-recommends ros-melodic-ros-base
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 
+RUN apt update && apt install -y --no-install-recommends python3-catkin-tools ros-melodic-vision-msgs
+
 # Copy project related sources
-#COPY PointPillars_MultiHead_40FPS /app/PointPillars_MultiHead_40FPS/
+#COPY PointPillars /app/PointPillars/
 COPY OpenPCDet /app/OpenPCDet/
 COPY spconv /app/spconv/
 COPY Makefile /app/Makefile
@@ -127,6 +129,14 @@ RUN cd /app && make build-spconv
 
 # AS a last thing, the project
 # So when we do changes here, we need to redo only one layer
-COPY PointPillars_MultiHead_40FPS /app/PointPillars_MultiHead_40FPS/
+COPY PointPillars /app/PointPillars/
+
+# Clone: https://github.com/ros-perception/vision_msgs.git
+# inside PointPillars and
+# mkdir build && cd build && cmake .. && make -j8 && source devel.setup
+
+# Install
+# python3-catkin-tools
+# ros-melodic-pcl-ros
 
 WORKDIR /app
