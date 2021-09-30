@@ -13,7 +13,8 @@ docker-launch: ## Launch interactive docker container with display
 	--gpus all \
 	-it \
 	-v `pwd`/model:/app/model/ \
-	-v `pwd`/PointPillars_MultiHead_40FPS:/app/PointPillars_MultiHead_40FPS/ \
+	-v `pwd`/PointPillars:/app/PointPillars/ \
+	-v `pwd`/src:/app/src/ \
 	--network=host \
 	pointpillars
 
@@ -34,9 +35,9 @@ build-openpcdet: ## Build OpenPCDet (3rd party dependency)
 	pip3 install -r requirements.txt; \
 	python3 setup.py develop
 
-# https://github.com/hova88/PointPillars_MultiHead_40FPS
+# https://github.com/hova88/PointPillars
 build-pointpillars: ## Builds PointPillars
-	cd PointPillars_MultiHead_40FPS; \
+	cd PointPillars; \
 	mkdir build && cd build; \
 	cmake .. -DNVONNXPARSERS=/app/TensorRT-7.1.3.4/lib/libnvonnxparser.so -DNVINFER=/app/TensorRT-7.1.3.4/lib/libnvinfer.so && make -j$(nproc) && ./test/test_model
 
@@ -52,9 +53,9 @@ generate-trt: ## Converts ONNX model to TensorRT
 	onnx2trt cbgs_pp_multihead_pfe.onnx -o cbgs_pp_multihead_pfe.trt -b 1 -d 16; \
     onnx2trt cbgs_pp_multihead_backbone.onnx -o cbgs_pp_multihead_backbone.trt -b 1 -d 16
 
-# https://github.com/hova88/PointPillars_MultiHead_40FPS
+# https://github.com/hova88/PointPillars
 visualize:
-	cd PointPillars_MultiHead_40FPS/tools; \
+	cd PointPillars/tools; \
 	python3 viewer.py
 
 help: ## Display callable targets.
