@@ -108,7 +108,7 @@ RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt
 RUN apt-get update && apt-get install -y --no-install-recommends ros-melodic-ros-base
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 
-RUN apt update && apt install -y --no-install-recommends python3-catkin-tools ros-melodic-vision-msgs
+RUN apt update && apt install -y --no-install-recommends python3-catkin-tools
 
 # Copy project related sources
 #COPY PointPillars /app/PointPillars/
@@ -129,7 +129,9 @@ RUN cd /app && make build-spconv
 
 # AS a last thing, the project
 # So when we do changes here, we need to redo only one layer
+COPY src /app/src/
 COPY PointPillars /app/PointPillars/
+
 
 # Clone: https://github.com/ros-perception/vision_msgs.git
 # inside PointPillars and
@@ -138,5 +140,33 @@ COPY PointPillars /app/PointPillars/
 # Install
 # python3-catkin-tools
 # ros-melodic-pcl-ros
+
+#RUN cd /app && catkin init && catkin build
+
+# CUDA ENV setup
+
+#RUN export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}$ 
+#RUN export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# Create symlink v10.2 in advance, so that libnvrtc can be found.
+#RUN mkdir /workspace/lib/ && cd /workspace/lib/ && ln -s libnvrtc.so.10.2.89 libnvrtc.so.10.2
+# sudo ln -s ~/devtools/TensorRT-7.1.3.4/ tensorrt
+
+#RUN cd /usr/local/cuda/include && ls
+
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<TensorRT-${version}/lib>
+
+RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
+    cd /app && \
+    catkin config --init --install && \
+    catkin build --cmake-args -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
+
+
+FROM base as production
+
+# Copy onle required stuff for running
+COPY --from=base /app/install/ /app/install/
+COPY --from=base /app/TensorRT-7.1.3.4/lib /app/TensorRT-7.1.3.4/lib
+COPY --from=base /app/TensorRT-7.1.3.4/bin /app/TensorRT-7.1.3.4/bin
 
 WORKDIR /app

@@ -8,7 +8,7 @@ project(pointpillars)
 option(BUILD_SHARED_LIBS "Build as a shared library"  ON)
 option(USE_DOUBLE        "Use double as kernel_type" OFF)
 option(TEST              "BUILD TEST"                 ON)
-option(RUNNER            "BUILD RUNNER"               ON)
+option(RUNNER            "BUILD RUNNER"               OFF)
 option(BENCH             "BUILD BENCH"               OFF)
 
 if(USE_DOUBLE)
