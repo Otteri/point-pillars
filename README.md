@@ -26,3 +26,11 @@ dependencies just for rendering the output. There are chances that you have many
 
 
 Note: it is better to place yaml-copies to PointPillars or model directory and use these instead of modifying OpenPCDet configs. This is because changes in OpenPCDet repo, force us to build the project again as docker cache gets busted.
+
+
+### Installation
+Project is picky about dependency versions. We don't want to replace system libraries with older versions, so dependencies has to be built from source and since source build location can be anything, we must specify it manually by setting environemnt variables
+
+TENSORRT=/home/joni/devtools/TensorRT-7.1.3.4
+
+catkin build --cmake-args -DTENSORRT_ROOT=/path/to/TensorRT-7.1.3.4
