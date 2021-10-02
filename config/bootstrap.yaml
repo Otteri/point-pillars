@@ -1,0 +1,12 @@
+BoxFeature: 7
+ScoreThreshold: 0.2
+NmsOverlapThreshold: 0.2
+UseOnnx: false
+
+PfeOnnx: /app/config/cbgs_pp_multihead_pfe.onnx
+BackboneOnnx: /app/config/cbgs_pp_multihead_backbone.onnx
+
+PfeTrt: /app/config/cbgs_pp_multihead_pfe.trt
+BackboneTrt: /app/config/cbgs_pp_multihead_backbone.trt
+
+ModelConfig: /app/config/cbgs_pp_multihead.yaml

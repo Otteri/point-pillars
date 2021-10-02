@@ -1,6 +1,7 @@
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DELPP_NO_DEFAULT_LOG_FILE")
 
 #file(GLOB_RECURSE SRC *)
@@ -44,3 +45,15 @@ target_link_libraries(${PROJECT_LIB_NAME} ${LINK_LIBRARY} OpenMP::OpenMP_CXX)
 
 # install(EXPORT ${PROJECT_NAME}Targets
 #     NAMESPACE XComp:: DESTINATION lib/cmake/)
+
+##########
+# Install
+##########
+message("Installing pointpillars...")
+message("${PROJECT_LIB_NAME} -> ${CMAKE_CURRENT_SOURCE_DIR}/../../install/lib")
+install(TARGETS ${PROJECT_LIB_NAME} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../install/lib)
+install(
+    DIRECTORY "."
+    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../install/include/${PROJECT_NAME}
+    FILES_MATCHING PATTERN "*.h"
+)

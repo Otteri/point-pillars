@@ -1,6 +1,9 @@
 add_subdirectory(gtest)
 
-include_directories(./gtest/googletest/include)
+include_directories(
+    ./gtest/googletest/include
+    ${TENSORRT_ROOT}/include/
+)
 
 set(test_src
   run_all.cc
@@ -13,9 +16,6 @@ target_link_libraries(test_model
   gtest
   ${LINK_LIBRARY} 
   ${PROJECT_LIB_NAME}
-  # ${DG_LIB_NAME}
-  # ${CMAKE_THREAD_LIBS_INIT}
-  # ${MATH_LIBS}
 )
 
 add_test(

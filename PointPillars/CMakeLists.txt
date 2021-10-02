@@ -8,15 +8,17 @@ project(pointpillars)
 option(BUILD_SHARED_LIBS "Build as a shared library"  ON)
 option(USE_DOUBLE        "Use double as kernel_type" OFF)
 option(TEST              "BUILD TEST"                 ON)
-option(RUNNER            "BUILD RUNNER"               OFF)
 option(BENCH             "BUILD BENCH"               OFF)
 
 if(USE_DOUBLE)
     message("Use double as kernel_type")
 endif()
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif ()
+
+# Enable optimizations only in the release mode
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    message("Release build, using O3 optimization...")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+endif()
 
 ############################################################
 # add 3th_part library
@@ -37,21 +39,25 @@ else ()
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -std=c++14 -Wno-deprecated-gpu-targets)
 endif ()
 
-find_library(NVINFER NAMES nvinfer)
-find_library(NVPARSERS NAMES nvparsers)
-find_library(NVONNXPARSERS NAMES nvonnxparser)
+include_directories(
+    ${TENSORRT_ROOT}/include/
+)
+
+link_directories(
+    ${TENSORRT_ROOT}/lib # libnvonxxparser, libnvinfer, ...
+)
 
 list(APPEND LINK_LIBRARY
             ${CUDA_cusparse_LIBRARY}
-            ${NVINFER}
-            ${NVONNXPARSERS}
             ${CUDA_LIBRARIES}
             ${CUDA_CUBLAS_LIBRARIES}
             ${CUDA_curand_LIBRARY}            
             ${CUDA_cusparse_LIBRARY}
 
+            nvinfer
+            nvonnxparser
             yaml-cpp
-            )
+            )        
 
 # Correct error for GCC 5 and CUDA 7.5
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML_BUILD_SHARED_LIBS=ON -D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES ")
@@ -79,11 +85,6 @@ if (TEST)
     message("Building tests")
     enable_testing()
     add_subdirectory(test)
-endif ()
-
-if (RUNNER)
-    message("Building runner")
-    add_subdirectory(lidar_detector)
 endif ()
 
 message(STATUS "")

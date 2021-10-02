@@ -1,4 +1,5 @@
 ###################################################################
+# Author: Joni Airaksinen (Otteri)
 # Build: $ docker build -f Dockerfile -t pointpillars .
 # Run:   $ docker run --gpus all -it pointpillars
 #
@@ -8,8 +9,7 @@
 # Path to binary release. Assumes it to be in repo root by default.
 ARG TENSORRT=TensorRT-7.1.3.4.Ubuntu-18.04.x86_64-gnu.cuda-10.2.cudnn8.0.tar.gz
 
-# nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
-FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04 AS base
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04 AS dependency-stage
 
 SHELL ["/bin/bash", "-c"]
 
@@ -90,13 +90,9 @@ RUN cd /app/TensorRT/third_party/protobuf \
 # Build onnx-tenssort, so we can generate trt-models
 RUN cd /app/onnx-tensorrt \
 	&& mkdir build && cd build \
-	&& cmake .. -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && make -j \
+	&& cmake .. -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && make -j$(nproc) \
 	&& export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH \
     && make install
-
-# Make onnx2trt findable from anywhere
-ENV PATH "$PATH:/usr/local/bin"
-ENV LD_LIBRARY_PATH="/app/TensorRT-7.1.3.4/lib:${LD_LIBRARY_PATH}"
 
 # Install ROS melodic on Ubuntu (http://wiki.ros.org/melodic/Installation/Ubuntu)
 RUN /bin/sh -c echo 'Etc/UTC' > /etc/timezone &&     ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &&     apt-get update &&     apt-get install -q -y --no-install-recommends tzdata &&     rm -rf /var/lib/apt/lists/*
@@ -107,25 +103,20 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/
 RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 RUN apt-get update && apt-get install -y --no-install-recommends ros-melodic-ros-base
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
-
 RUN apt update && apt install -y --no-install-recommends python3-catkin-tools
 
 # Copy project related sources
-#COPY PointPillars /app/PointPillars/
 COPY OpenPCDet /app/OpenPCDet/
 COPY spconv /app/spconv/
 COPY Makefile /app/Makefile
+
+# Run separately for better caching
+RUN cd /app && make build-spconv
 
 # For some reason OpenPCDet needs .git:
 # /app/OpenPCDet/tools/onnx_utils# python3 trans_pfe.py
 # fatal: not a git repository: /app/OpenPCDet/../.git/modules/OpenPCDet
 COPY .git /app/.git/
-
-# Run separately for better caching
-RUN cd /app && make build-spconv
-
-# Build sources
-#RUN cd /app && make build
 
 # AS a last thing, the project
 # So when we do changes here, we need to redo only one layer
@@ -133,40 +124,56 @@ COPY src /app/src/
 COPY PointPillars /app/PointPillars/
 
 
-# Clone: https://github.com/ros-perception/vision_msgs.git
-# inside PointPillars and
-# mkdir build && cd build && cmake .. && make -j8 && source devel.setup
+################################################################################
+FROM dependency-stage as debug-stage
 
-# Install
-# python3-catkin-tools
-# ros-melodic-pcl-ros
+# Build pointpillars library
+RUN /bin/bash -c "cd /app/PointPillars/ && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && \
+    make -j$(nproc) && \
+    make install"
 
-#RUN cd /app && catkin init && catkin build
-
-# CUDA ENV setup
-
-#RUN export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}$ 
-#RUN export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-
-# Create symlink v10.2 in advance, so that libnvrtc can be found.
-#RUN mkdir /workspace/lib/ && cd /workspace/lib/ && ln -s libnvrtc.so.10.2.89 libnvrtc.so.10.2
-# sudo ln -s ~/devtools/TensorRT-7.1.3.4/ tensorrt
-
-#RUN cd /usr/local/cuda/include && ls
-
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<TensorRT-${version}/lib>
-
+# Build ROS detector
 RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     cd /app && \
     catkin config --init --install && \
-    catkin build --cmake-args -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
-
-
-FROM base as production
-
-# Copy onle required stuff for running
-COPY --from=base /app/install/ /app/install/
-COPY --from=base /app/TensorRT-7.1.3.4/lib /app/TensorRT-7.1.3.4/lib
-COPY --from=base /app/TensorRT-7.1.3.4/bin /app/TensorRT-7.1.3.4/bin
+    catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
 
 WORKDIR /app
+
+
+################################################################################
+FROM dependency-stage as release-stage
+
+# Build pointpillars library
+RUN /bin/bash -c "cd /app/PointPillars/ && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && \
+    make -j$(nproc) && \
+    make install"
+
+# Build ROS detector
+RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
+    cd /app && \
+    catkin config --init --install && \
+    catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
+
+
+################################################################################
+FROM ros:melodic-ros-core as production-stage
+
+# Copy needed libraries and binaries for running the app
+COPY --from=release-stage /app/install/ /app/install/
+COPY --from=dependency-stage /usr/local/cuda/bin /usr/local/cuda/bin
+COPY --from=dependency-stage /usr/local/cuda/lib64 /usr/local/cuda/lib64
+COPY --from=dependency-stage /app/TensorRT-7.1.3.4/lib /app/TensorRT-7.1.3.4/lib
+COPY --from=dependency-stage /app/TensorRT-7.1.3.4/bin /app/TensorRT-7.1.3.4/bin
+COPY --from=dependency-stage /usr/lib/x86_64-linux-gnu  /usr/lib/x86_64-linux-gnu
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/app/TensorRT-7.1.3.4/lib:/usr/local/cuda/lib64"
+ENV PATH=${PATH}:/usr/local/cuda/bin
+
+ENTRYPOINT bash -c "cd /app/ && source install/setup.bash && roslaunch lidar_detector lidar_node.launch"
