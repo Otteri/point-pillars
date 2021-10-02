@@ -5,18 +5,29 @@ docker-setup:
 	cp /app/TensorRT-7.1.3.4/include/* /usr/include/
 	export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/app/TensorRT-7.1.3.4/lib
 
-docker-build: ## Build docker image
-	docker build -f Dockerfile -t pointpillars .
+docker-build: ## Build production image
+	docker build --target production-stage -t pointpillars .
 
-docker-launch: ## Launch interactive docker container with display
+docker-launch: ## Launch pointpillars application container
 	docker run \
 	--gpus all \
+	--rm \
 	-it \
-	-v `pwd`/model:/app/model/ \
-	-v `pwd`/PointPillars:/app/PointPillars/ \
-	-v `pwd`/src:/app/src/ \
+	-v `pwd`/config:/app/config/ \
 	--network=host \
 	pointpillars
+
+docker-build-debug: ## Build debug docker image
+	docker build --target debug-stage -t pointpillars-debug .
+
+docker-launch-debug: ## Launch interactive debug container
+	docker run \
+	--gpus all \
+	--rm \
+	-it \
+	-v `pwd`/config:/app/config/ \
+	--network=host \
+	pointpillars-debug
 
 build: ## Build all submodules and PointPillars
 	${MAKE} build-spconv

@@ -1,3 +1,9 @@
+devel/
+install/
+logs/
+.catkin_tools/
+.vscode/
+
 TensorRT*.tar.gz
 odts-msgs/
 
