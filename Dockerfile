@@ -1,7 +1,8 @@
 ###################################################################
 # Author: Joni Airaksinen (Otteri)
 # Build: $ docker build -f Dockerfile -t pointpillars .
-# Run:   $ docker run --gpus all -it pointpillars
+# Run:   $ docker run --gpus all --rm -it \
+#          -v `pwd`/config:/app/config/ --network=host pointpillars
 #
 # Keywords: CUDA 10.2, cudnn 7 & 8, TensorRT-7.1.3.4, ubuntu18.04
 ###################################################################
@@ -139,6 +140,7 @@ RUN /bin/bash -c "cd /app/PointPillars/ && \
 RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     cd /app && \
     catkin config --init --install && \
+    catkin clean -yb && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
 
 WORKDIR /app
@@ -159,6 +161,7 @@ RUN /bin/bash -c "cd /app/PointPillars/ && \
 RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     cd /app && \
     catkin config --init --install && \
+    catkin clean -yb && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
 
 
@@ -171,7 +174,15 @@ COPY --from=dependency-stage /usr/local/cuda/bin /usr/local/cuda/bin
 COPY --from=dependency-stage /usr/local/cuda/lib64 /usr/local/cuda/lib64
 COPY --from=dependency-stage /app/TensorRT-7.1.3.4/lib /app/TensorRT-7.1.3.4/lib
 COPY --from=dependency-stage /app/TensorRT-7.1.3.4/bin /app/TensorRT-7.1.3.4/bin
-COPY --from=dependency-stage /usr/lib/x86_64-linux-gnu  /usr/lib/x86_64-linux-gnu
+
+COPY --from=dependency-stage \
+    /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.5 \
+    /usr/lib/x86_64-linux-gnu/libcublas.so.10 \
+    /usr/lib/x86_64-linux-gnu/libcudnn.so.8 \
+    /usr/lib/x86_64-linux-gnu/libcublasLt.so.10 \
+    /usr/lib/x86_64-linux-gnu/libcudnn_ops_infer.so.8 \
+    /usr/lib/x86_64-linux-gnu/libcudnn_cnn_infer.so.8 \
+    /usr/lib/x86_64-linux-gnu/
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/app/TensorRT-7.1.3.4/lib:/usr/local/cuda/lib64"
 ENV PATH=${PATH}:/usr/local/cuda/bin
