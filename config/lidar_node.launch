@@ -2,18 +2,18 @@
 
 <launch>
     <!-- Input topics -->
-    <arg name="lidar_topic"                   default="/lidar_points_rectified"/> <!-- /lidar_points_rectified -->
+    <arg name="lidar_topic"                   default="/lidar_points_rectified"/>
 
     <!-- Outputs topics -->
-    <arg name="pointcloud_topic"               default="/lidar/detection_cloud"/>
-    <arg name="detection_topic"                default="/lidar/detections"/>
+    <arg name="detection_topic"                default="/pointpillar/detections"/>
 
     <arg name="frame"                          default="/base_link"/>
 
     <!-- Configuration -->
     <arg name="debug"                          default="true"/>
     <arg name="config_path"                    default="/app/config/bootstrap.yaml"/>
-    <arg name="loop_rate_hz"                   default="40.0"/>
+    <arg name="detecting_rate_hz"              default="2.5"/>
+    <arg name="buffering_rate_hz"              default="3.0"/>
     <arg name="input_queue_size"               default="1"/> <!--  pcls are large, should be small number-->
     <arg name="use_sim_time"                   default="true"/>
     <param name="/use_sim_time"                value="$(arg use_sim_time)" />
@@ -22,12 +22,12 @@
     <node name="lidar_node" type="lidar_detector" pkg="lidar_detector" cwd="node" output="screen" >
         <param name="debug"                         value="$(arg debug)"/>
         <param name="config_path"                   value="$(arg config_path)"/>
-        <param name="loop_rate_hz"                  value="$(arg loop_rate_hz)"/>
+        <param name="detecting_rate_hz"             value="$(arg detecting_rate_hz)"/>
+        <param name="buffering_rate_hz"             value="$(arg buffering_rate_hz)"/>
         <param name="input_queue_size"              value="$(arg input_queue_size)"/>
         <param name="frame"                         value="$(arg frame)"/>
 
         <param name="lidar_topic"                   value="$(arg lidar_topic)"/>
-        <param name="pointcloud_topic"              value="$(arg pointcloud_topic)"/>
         <param name="detection_topic"               value="$(arg detection_topic)"/>
     </node>
 </launch>

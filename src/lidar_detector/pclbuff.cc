@@ -20,13 +20,16 @@ PclBuff::PclBuff(const ros::NodeHandle& nh)
     int input_queue_size;
     nh.param<int>("input_queue_size", input_queue_size,  1);
 
-    nh.param<double>("loop_rate_hz", loop_rate_hz_, 40.0);
+    nh.param<double>("buffering_rate_hz", loop_rate_hz_, 40.0);
 
     // Subscriber for lidar messages
     pcl_sub_ = nh_.subscribe(
         pcl_topic, input_queue_size, &PclBuff::lidarDataCallback, this, ros::TransportHints().tcpNoDelay());
 
-    ROS_INFO_STREAM("PclBuff initialized and listening: '" << pcl_topic << "'" << std::endl);
+    previous_time_ = std::chrono::high_resolution_clock::now();
+
+
+    ROS_DEBUG_STREAM("PclBuff initialized and listening: '" << pcl_topic << "' with rate of " <<  loop_rate_hz_ << " Hz" << std::endl);
 }
 
 void PclBuff::start()
@@ -50,6 +53,8 @@ void PclBuff::stop()
 
 void PclBuff::lidarDataCallback(const sensor_msgs::PointCloud2ConstPtr& pcl_msg)
 {
+    //auto start_time = std::chrono::high_resolution_clock::now();
+
     sensor_msgs::PointCloud pointcloud;
     sensor_msgs::convertPointCloud2ToPointCloud(*pcl_msg, pointcloud);
 
@@ -61,6 +66,11 @@ void PclBuff::lidarDataCallback(const sensor_msgs::PointCloud2ConstPtr& pcl_msg)
     storage.data = new float[storage.size];
 
     processData(storage, pointcloud);
+
+    auto time_now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> loop_time = time_now - previous_time_;
+    ROS_DEBUG_STREAM("Buffering: " << 1.0 / loop_time.count() << " Hz");
+    previous_time_ = time_now;
 
     //delete data;
 

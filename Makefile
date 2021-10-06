@@ -6,7 +6,7 @@ docker-setup:
 	export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/app/TensorRT-7.1.3.4/lib
 
 docker-build: ## Build production image
-	docker build --target production-stage -t pointpillars .
+	docker build --target production-stage -t pointpillars:latest .
 
 docker-launch: ## Launch pointpillars application container
 	docker run \
@@ -14,8 +14,9 @@ docker-launch: ## Launch pointpillars application container
 	--rm \
 	-it \
 	-v `pwd`/config:/app/config/ \
+	-v `pwd`/config/lidar_node.launch:/app/install/share/lidar_detector/launch/lidar_node.launch \
 	--network=host \
-	pointpillars
+	pointpillars:latest
 
 docker-build-debug: ## Build debug docker image
 	docker build --target debug-stage -t pointpillars-debug .
