@@ -2,6 +2,7 @@
 
 #include <ros/ros.h>
 #include <mutex>
+#include <chrono>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -22,18 +23,14 @@ public:
 
     size_t getData(float** data); // We only update pointer, thus **
     void markDone();
-    void clearStorage(Storage storage); // Priv
 
     void start();
     void stop();
 
-    Storage& selectStorage();
-
 private:
     void lidarDataCallback(const sensor_msgs::PointCloud2ConstPtr& pcl_cloud);
-
     void processData(Storage storage, sensor_msgs::PointCloud input);
-    //float* const selectStorage();
+    Storage& selectStorage();
     void deleteStorage();
 
     uint feature_count;
@@ -47,4 +44,6 @@ private:
 
     bool run_; // should this process run?
     double loop_rate_hz_; // How fast we would like it to run?
+
+    std::chrono::high_resolution_clock::time_point previous_time_;
 };

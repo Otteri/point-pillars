@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     double loop_rate_hz;
     std::string config_path;
     param_nh.param<bool>("debug", debug, true);
-    param_nh.param<double>("loop_rate_hz", loop_rate_hz, 1.0);
+    param_nh.param<double>("detecting_rate_hz", loop_rate_hz, 40.0);
     param_nh.param<std::string>("config_path", config_path, "/app/config/bootstrap.yaml");
 
 
@@ -36,12 +36,12 @@ int main(int argc, char** argv)
         ros::console::notifyLoggerLevelsChanged();
     }
 
-    ROS_INFO_STREAM("Configurations:" << std::endl
+    ROS_DEBUG_STREAM("Configurations:" << std::endl
         << "  debug: "   << (debug == 1 ? "true" : "false")
     );
 
     // Create class instance with desired settings
-    ROS_INFO_STREAM("Loading bootstrap config:" << config_path);
+    ROS_DEBUG_STREAM("Loading bootstrap config:" << config_path);
     YAML::Node config = YAML::LoadFile(config_path); // DB_CONF
     // Decide between TRT and Onnx files
     std::string pfe_file, backbone_file; 
@@ -52,29 +52,32 @@ int main(int argc, char** argv)
     pfe_file = config["PfeTrt"].as<std::string>();
     backbone_file = config["BackboneTrt"].as<std::string>();
     }
-    std::cout << "Backbone: "<< backbone_file << std::endl;
+    ROS_DEBUG_STREAM("Backbone: "<< backbone_file);
 
     PclBuff data_buffer(param_nh);
     LidarNode lidar_node(param_nh, debug, config, pfe_file, backbone_file);
-    ROS_INFO("Node initialization complete!");
-
+    ROS_DEBUG_STREAM("Node initialization complete! Trying to run: " << loop_rate_hz << " Hz");
 
     // Start lidar data buffering process
     std::thread (&PclBuff::start, data_buffer).detach();
 
     ros::Rate loop_rate(loop_rate_hz);
     float* data = nullptr;
-    size_t point_threshold = 1000;
+    size_t point_threshold = 500;
 
     while (run)
     {
+        auto start_time = std::chrono::high_resolution_clock::now();
+
+        loop_rate.sleep();
+
         size_t point_count = data_buffer.getData(&data);
         if ((point_count > point_threshold) && (data != nullptr))
         {
             std::vector<int> out_labels;
             std::vector<float> out_detections, out_scores;
             size_t detection_count = lidar_node.detect(data, point_count, out_detections, out_labels, out_scores);
-            
+
             if (detection_count > 0)
             {
                 lidar_node.publishDetectionMsg(out_detections);
@@ -82,6 +85,10 @@ int main(int argc, char** argv)
         }
 
         data_buffer.markDone();
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> processing_time = end_time - start_time;
+        ROS_DEBUG_STREAM("Main loop: " << 1.0 / processing_time.count() << " Hz, recieved: " << point_count << " points");
     }
 
     data_buffer.stop(); // free buffering process resources
