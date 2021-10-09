@@ -1,0 +1,5 @@
+<launch>
+    <include file="$(find lidar_detector)/launch/lidar_node.launch" />
+
+    <test pkg="lidar_detector" test-name="lidar_node_tester" type="lidar_node_tester" />
+</launch>
