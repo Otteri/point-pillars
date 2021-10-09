@@ -39,6 +39,8 @@ else ()
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -std=c++14 -Wno-deprecated-gpu-targets)
 endif ()
 
+message("Using TENSORRT_ROOT: ${TENSORRT_ROOT}")
+
 include_directories(
     ${TENSORRT_ROOT}/include/
 )

@@ -10,3 +10,6 @@
 [submodule "TensorRT"]
 	path = TensorRT
 	url = https://github.com/nvidia/TensorRT
+[submodule "third_party/googletest"]
+	path = third_party/googletest
+	url = https://github.com/google/googletest.git

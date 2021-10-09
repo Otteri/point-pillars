@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.18)
 project(lidar_detector)
 
+option(TEST_LIDAR_DETECTOR              "BUILD TEST"                 ON)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     message("Release build, using O3 optimization...")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
+
+message("Using TENSORRT_ROOT: ${TENSORRT_ROOT}")
 
 find_package(catkin REQUIRED)
 ############################################################
@@ -74,6 +78,7 @@ target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
 
+
 #############
 ## Install ##
 #############
@@ -89,3 +94,12 @@ install(TARGETS lidar_detector
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+message("TEST_LIDAR_DETECTOR: ${TEST_LIDAR_DETECTOR}")
+#############
+## Testing ##
+#############
+if (TEST_LIDAR_DETECTOR)
+    enable_testing()
+    add_subdirectory("test")
+endif ()
