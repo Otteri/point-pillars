@@ -1,0 +1,15 @@
+BoxFeature: 7
+ScoreThreshold: 0.2
+NmsOverlapThreshold: 0.2
+UseOnnx: false
+
+PfeOnnx: ../../model/cbgs_pp_multihead_pfe.onnx
+BackboneOnnx: ../../model/cbgs_pp_multihead_backbone.onnx
+
+PfeTrt: ../../model/cbgs_pp_multihead_pfe.trt
+BackboneTrt: ../../model/cbgs_pp_multihead_backbone.trt
+
+ModelConfig: ../pointpillars/cfgs/cbgs_pp_multihead.yaml
+
+InputFile: ../../model/nuscenes_10sweeps_points.txt
+OutputFile: ../../model/boxes.txt
