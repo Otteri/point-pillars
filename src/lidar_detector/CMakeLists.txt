@@ -71,13 +71,15 @@ target_link_directories(${PROJECT_NAME}
     ${TENSORRT_ROOT}/lib # libnvonxxparser, libnvinfer, ...
 )
 
-target_link_libraries(${PROJECT_NAME}
+set(PROJECT_LIBS
   ${CUDA_LIBRARIES}
-  pointpillars
+  #pointpillars
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../PointPillars/build/lib/libpointpillars.so
   yaml-cpp
   ${catkin_LIBRARIES}
 )
 
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_LIBS})
 
 #############
 ## Install ##

@@ -99,5 +99,8 @@ test-lidar-detector:
 	cd build/lidar_detector; \
 	make run_tests
 
+test-lidar-detector-with-text:
+	rostest lidar_detector lidar_node.test --text
+
 help: ## Display callable targets.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

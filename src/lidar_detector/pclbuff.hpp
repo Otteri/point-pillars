@@ -22,10 +22,12 @@ public:
     PclBuff(const ros::NodeHandle& nh);
 
     size_t getData(float** data); // We only update pointer, thus **
+    double getCurrentRunRate();
     void markDone();
 
     void start();
     void stop();
+
 
 private:
     void lidarDataCallback(const sensor_msgs::PointCloud2ConstPtr& pcl_cloud);
@@ -43,7 +45,8 @@ private:
     Storage& storage; // active storage
 
     bool run_; // should this process run?
-    double loop_rate_hz_; // How fast we would like it to run?
+    double loop_rate_hz_; // How fast we would like this to run?
+    double current_loop_rate_hz_; // How fast actually runs.
 
     std::chrono::high_resolution_clock::time_point previous_time_;
 };
