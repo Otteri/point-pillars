@@ -1,8 +1,8 @@
 <launch>
-    <include file="$(find lidar_detector)/launch/lidar_node.launch" />
+    <param name="/use_sim_time" value="true"/>
+    <param name="debug" value="true"/>
 
-    <!-- Loop the same single message from pointcloud bag -->
-    <node pkg="rosbag" type="play" name="rosbag" args="-l $(find package)/test/pointcloud.bag"/>
+    <node pkg="rosbag" type="play" name="player" output="screen" args="-d 0.0 -l --clock $(find lidar_detector)/test/pointcloud.bag"/>
 
     <test pkg="lidar_detector" test-name="lidar_node_tester" type="lidar_node_tester" />
 </launch>
