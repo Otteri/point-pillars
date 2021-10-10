@@ -18,6 +18,11 @@
     <arg name="use_sim_time"                   default="true"/>
     <param name="/use_sim_time"                value="$(arg use_sim_time)" />
 
+
+    <!-- <node name="player" pkg="rosbag" type="rosbag" args="play /home/joni/code/point-pillars/pointcloud.bag"/> -->
+    <!-- <node pkg="rosbag" type="play" name="rosbag" args="-l /home/joni/code/point-pillars/pointcloud.bag"/> -->
+
+
     <!-- Finally, create node -->
     <node name="lidar_node" type="lidar_detector" pkg="lidar_detector" cwd="node" output="screen" >
         <param name="debug"                         value="$(arg debug)"/>

@@ -29,4 +29,46 @@ Note: it is better to place yaml-copies to PointPillars or model directory and u
 ## Env variables
 Project is picky about versions. We don't want to replace system libraries with older versions, so dependencies has to be built from source and their location must be specified manually with environment/build variables.
 
-For example this must be set by user: `TENSORRT_ROOT`
+User must set `TENSORRT_ROOT`, before pointpillars can be built succesfully. Variable can be set from terminal:
+`export TENSORRT_ROOT=/path/to/TensorRT-7.1.3.4`.
+
+
+## Repo structure
+
+Initially structure looks like this
+```
+├── config
+├── Dockerfile
+├── onnx-tensorrt
+├── OpenPCDet
+├── PointPillars
+├── spconv
+├── src
+├── TensorRT
+└── third_party
+```
+
+But when you have gotten all configured and running,
+there should be a few directories more
+```
+├── build
+├── config
+├── devel
+├── logs
+├── model
+├── onnx-tensorrt
+├── OpenPCDet
+├── PointPillars
+├── spconv
+├── src
+├── TensorRT
+├── TensorRT-7.1.3.4.Ubuntu-18.04.x86_64-gnu.cuda-10.2.cudnn8.0.tar.gz
+└── third_party
+```
+
+## Q.A
+
+ fatal error: NvInfer.h: No such file or directory
+ #include "NvInfer.h"
+
+ TensorRt TCheck that `TENSORRT_ROOT` is pointing to correct location.
