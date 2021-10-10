@@ -62,7 +62,6 @@ TEST(PointPillars, __build_model__) {
     pfe_file = config["PfeTrt"].as<std::string>();
     backbone_file = config["BackboneTrt"].as<std::string>();
   }
-  std::cout << backbone_file << std::endl;
   const std::string pp_config = config["ModelConfig"].as<std::string>();
   PointPillars pp(
     config["ScoreThreshold"].as<float>(),
@@ -76,12 +75,9 @@ TEST(PointPillars, __build_model__) {
   float* points_array;
   int in_num_points;
   in_num_points = Txt2Arrary(points_array,file_name,5);
-    printf("points_array[0]: %f, points_array[1]: %f, points_array[2]: %f points_array[3]: %f, points_array[4]: %f points_array[5]: %f", *points_array, *points_array++, *points_array++, *points_array++, *points_array++, *points_array++);
-
   
-  for (int _ = 0 ; _ < 1 ; _++) // 10 originally
+  for (int _ = 0 ; _ < 10 ; _++)
   {
-
     std::vector<float> out_detections;
     std::vector<int> out_labels;
     std::vector<float> out_scores;
@@ -94,7 +90,10 @@ TEST(PointPillars, __build_model__) {
 
     std::string boxes_file_name = config["OutputFile"].as<std::string>();
     Boxes2Txt(out_detections , boxes_file_name );
-    EXPECT_EQ(num_objects,228);
+    // Number of object depends on configurations and also TensorRT library
+    // Just check that some number of objects is detected
+    EXPECT_GE(num_objects, 50);
+    EXPECT_LE(num_objects, 300);
   }
 
 

@@ -70,6 +70,7 @@ test-pointpillars:  ## Runs pointpillar tests
 # https://github.com/hova88/PointPillars
 # You must run test first, before running this
 visualize-pointpillars:  ## Visualizes the test environment
+	${MAKE} test-pointpillars; \
 	cd PointPillars/tools; \
 	python3 viewer.py
 
