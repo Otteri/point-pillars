@@ -3,8 +3,8 @@
 #include <iostream>
 #include <math.h>
 
-#include <mbilly_msgs/MBillyDetection3D.h>
-#include <mbilly_msgs/MBillyDetection3DArray.h>
+#include <marker_publisher/Detection3D.h>
+#include <marker_publisher/Detection3DArray.h>
 
 
 LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node config, std::string pfe_file, std::string backbone_file)
@@ -26,7 +26,7 @@ LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node con
     nh.param<double>("loop_rate_hz",  loop_rate_hz_, 40.0);
 
     // Publisher for lidar detections
-    detection_pub_ = nh_.advertise<mbilly_msgs::MBillyDetection3DArray>(detection_topic, 5);
+    detection_pub_ = nh_.advertise<marker_publisher::Detection3DArray>(detection_topic, 5);
 }
 
 // A helper function that gives quaternion orientation from yaw (euler angle). 
@@ -43,6 +43,39 @@ geometry_msgs::Quaternion getOrientation(float yaw)
     return q;
 }
 
+std::string intLabelToString(int label)
+{
+    switch (label)
+    {
+    case 0: return "(0)"; // Car
+    case 1: return "(1)"; // Truck
+    case 2: return "(2)"; // Bus
+    case 3: return "(3)"; // Bus
+    case 4: return "(4)"; // Construction vehicle
+    case 5: return "(5)"; // Motorcycle
+    case 6: return "(6)"; // Bicycle
+    case 7: return "(7)"; // bicycle rack
+    case 8: return "(8)"; // Trailer
+    case 9: return "(9)"; // police
+    case 10: return "(10)"; // ambulance
+    case 11: return "(11)"; // adult
+    case 12: return "(12)"; // child
+    case 13: return "(13)"; // construction worker
+    case 14: return "(14)"; // Stroller: 
+    case 15: return "(15)"; // Wheelchair: 
+    case 16: return "(16)"; // Portable Personal Mobility Vehicle: A 
+    case 17: return "(17)"; // Police Officer: 
+
+    case 18: return "(18)";
+    case 19: return "(19)";
+    case 20: return "(20)";
+    case 21: return "(21)";
+    case 22: return "(22)";
+    case 23: return "(23)";
+    default: return "Unknown";
+    }
+}
+
 int LidarNode::detect(float* const pPoints, size_t in_num_points, std::vector<float>& out_detections, std::vector<int>&out_labels, std::vector<float>& out_scores)
 {
     float* points_array = pPoints;
@@ -57,26 +90,27 @@ int LidarNode::detect(float* const pPoints, size_t in_num_points, std::vector<fl
     return num_objects;
 };
 
-void LidarNode::publishDetectionMsg(std::vector<float>& out_detections)
+void LidarNode::publishDetectionMsg(std::vector<float>& out_detections, std::vector<int>& out_labels, std::vector<float>& out_scores)
 {
-    mbilly_msgs::MBillyDetection3DArray detection_array;
-    for (size_t i = 0; i < out_detections.size(); i=i+7)
+    marker_publisher::Detection3DArray detection_array;
+    for (size_t i = 0; i < out_detections.size() / 7; i++)
     {
         // boxes: (n,7) np.array = n*7  ( x, y, z, dx, dy, dz, yaw)   
-        mbilly_msgs::MBillyDetection3D detection;
-        detection.pose.position.x = out_detections[i];
-        detection.pose.position.y = out_detections[i+1];
-        detection.pose.position.z = out_detections[i+2];
+        marker_publisher::Detection3D detection;
+        size_t j = i*7; // packed data width is 7
+        detection.pose.position.x = out_detections[j];
+        detection.pose.position.y = out_detections[j+1];
+        detection.pose.position.z = out_detections[j+2];
 
-        detection.size.x = out_detections[i+3]; 
-        detection.size.y = out_detections[i+4];
-        detection.size.z = out_detections[i+5];
+        detection.size.x = out_detections[j+3]; 
+        detection.size.y = out_detections[j+4];
+        detection.size.z = out_detections[j+5];
 
-        float yaw = out_detections[i+6]; // radians
+        float yaw = out_detections[j+6]; // radians
         detection.pose.orientation = getOrientation(yaw);
 
-        detection.categories.push_back("Asdsad");
-        detection.category_confidences.push_back(1.0f);
+        detection.categories.push_back(intLabelToString(out_labels[i]));
+        detection.category_confidences.push_back(out_scores[i]);
 
         detection_array.header.stamp = ros::Time::now();
         detection_array.header.frame_id = frame_;
