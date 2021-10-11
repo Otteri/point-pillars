@@ -13,7 +13,5 @@
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
   <depend>message_filters</depend>
-  <depend>mbilly_msgs</depend>
-  <!--<depend>tf</depend>-->
-  <!-- <depend>tf_conversions</depend> -->
+  <depend>marker_publisher</depend>
 </package>

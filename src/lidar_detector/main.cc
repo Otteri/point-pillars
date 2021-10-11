@@ -76,12 +76,12 @@ int main(int argc, char** argv)
         {
             std::vector<int> out_labels;
             std::vector<float> out_detections, out_scores;
-            //size_t detection_count = lidar_node.detect(data, point_count, out_detections, out_labels, out_scores);
+            size_t detection_count = lidar_node.detect(data, point_count, out_detections, out_labels, out_scores);
 
-            // if (detection_count > 0)
-            // {
-            //     lidar_node.publishDetectionMsg(out_detections);
-            // }
+            if (detection_count > 0)
+            {
+                lidar_node.publishDetectionMsg(out_detections, out_labels, out_scores);
+            }
         }
 
         data_buffer.markDone();

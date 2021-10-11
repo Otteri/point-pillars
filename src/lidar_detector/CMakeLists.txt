@@ -40,7 +40,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     roscpp
     sensor_msgs
     message_filters
-    mbilly_msgs
+    marker_publisher
 )
 
 find_package(catkin REQUIRED COMPONENTS
