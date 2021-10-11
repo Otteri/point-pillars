@@ -5,7 +5,7 @@ logs/
 .vscode/
 
 TensorRT*.tar.gz
-odts-msgs/
+mbilly_msgs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

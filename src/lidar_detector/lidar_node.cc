@@ -3,8 +3,8 @@
 #include <iostream>
 #include <math.h>
 
-#include <odts_msgs/Detection3D.h>
-#include <odts_msgs/Detection3DArray.h>
+#include <mbilly_msgs/MBillyDetection3D.h>
+#include <mbilly_msgs/MBillyDetection3DArray.h>
 
 
 LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node config, std::string pfe_file, std::string backbone_file)
@@ -26,7 +26,7 @@ LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node con
     nh.param<double>("loop_rate_hz",  loop_rate_hz_, 40.0);
 
     // Publisher for lidar detections
-    detection_pub_ = nh_.advertise<odts_msgs::Detection3DArray>(detection_topic, 5);
+    detection_pub_ = nh_.advertise<mbilly_msgs::MBillyDetection3DArray>(detection_topic, 5);
 }
 
 // A helper function that gives quaternion orientation from yaw (euler angle). 
@@ -59,23 +59,24 @@ int LidarNode::detect(float* const pPoints, size_t in_num_points, std::vector<fl
 
 void LidarNode::publishDetectionMsg(std::vector<float>& out_detections)
 {
-    odts_msgs::Detection3DArray detection_array;
+    mbilly_msgs::MBillyDetection3DArray detection_array;
     for (size_t i = 0; i < out_detections.size(); i=i+7)
     {
         // boxes: (n,7) np.array = n*7  ( x, y, z, dx, dy, dz, yaw)   
-        odts_msgs::Detection3D detection;
-        detection.center.x = out_detections[i];
-        detection.center.y = out_detections[i+1];
-        detection.center.z = out_detections[i+2];
+        mbilly_msgs::MBillyDetection3D detection;
+        detection.pose.position.x = out_detections[i];
+        detection.pose.position.y = out_detections[i+1];
+        detection.pose.position.z = out_detections[i+2];
 
         detection.size.x = out_detections[i+3]; 
         detection.size.y = out_detections[i+4];
         detection.size.z = out_detections[i+5];
-        float yaw = out_detections[i+6]; // radians
-        detection.orientation = getOrientation(yaw);
 
-        // Arent these supported yet in marker publisher?
-        detection.confidence = 1.0f;
+        float yaw = out_detections[i+6]; // radians
+        detection.pose.orientation = getOrientation(yaw);
+
+        detection.categories.push_back("Asdsad");
+        detection.category_confidences.push_back(1.0f);
 
         detection_array.header.stamp = ros::Time::now();
         detection_array.header.frame_id = frame_;
