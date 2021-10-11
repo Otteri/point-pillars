@@ -9,7 +9,7 @@ public:
     LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node config, std::string pfe_file, std::string backbone_file);
 
     int detect(float* const points_array, size_t in_num_points, std::vector<float>& out_detections, std::vector<int>&out_labels, std::vector<float>& out_scores);
-    void publishDetectionMsg(std::vector<float>& out_detections);
+    void publishDetectionMsg(std::vector<float>& out_detections, std::vector<int>& out_labels, std::vector<float>& out_scores);
 
 private:
     ros::NodeHandle nh_;
