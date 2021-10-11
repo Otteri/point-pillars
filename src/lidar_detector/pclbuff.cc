@@ -53,8 +53,6 @@ void PclBuff::stop()
 
 void PclBuff::lidarDataCallback(const sensor_msgs::PointCloud2ConstPtr& pcl_msg)
 {
-    //auto start_time = std::chrono::high_resolution_clock::now();
-
     sensor_msgs::PointCloud pointcloud;
     sensor_msgs::convertPointCloud2ToPointCloud(*pcl_msg, pointcloud);
 
@@ -70,11 +68,10 @@ void PclBuff::lidarDataCallback(const sensor_msgs::PointCloud2ConstPtr& pcl_msg)
     auto time_now = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> loop_time = time_now - previous_time_;
     current_loop_rate_hz_ = 1.0 / loop_time.count();
-    ROS_DEBUG_STREAM("Buffering: " << current_loop_rate_hz_ << " Hz");
     previous_time_ = time_now;
+    ROS_DEBUG_STREAM("Buffering: " << current_loop_rate_hz_ << " Hz");
 
     //delete data;
-
     // if (storage.is_available)
     // {
     //     clearStorage(storage); // storage.clear() if it was class...

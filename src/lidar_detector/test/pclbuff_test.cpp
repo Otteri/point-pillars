@@ -23,6 +23,8 @@ protected:
         ros::Duration(1.0).sleep();
     }
 
+    static ros::NodeHandle* nh_;
+
 public:
     void SetUp() override
     {
@@ -32,14 +34,12 @@ public:
     {
     }
 
-    static ros::NodeHandle* nh_;
     static PclBuff* data_buffer_;
 };
 
 // Static storages
 ros::NodeHandle* PclBuffTest::nh_;  // ros::init() must be called before this, thus ptr
 PclBuff* PclBuffTest::data_buffer_; // We need nh_ for construting, thus ptr
-
 
 TEST_F(PclBuffTest, DoesPointCloudConversion)
 {

@@ -40,7 +40,7 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     roscpp
     sensor_msgs
     message_filters
-    odts_msgs
+    mbilly_msgs
 )
 
 find_package(catkin REQUIRED COMPONENTS

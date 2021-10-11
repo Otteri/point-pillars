@@ -45,8 +45,8 @@ private:
     Storage& storage; // active storage
 
     bool run_; // should this process run?
-    double loop_rate_hz_; // How fast we would like this to run?
-    double current_loop_rate_hz_; // How fast actually runs.
+    double loop_rate_hz_; // How fast we would like it to run?
+    double current_loop_rate_hz_; // How fast it actually runs
 
     std::chrono::high_resolution_clock::time_point previous_time_;
 };
