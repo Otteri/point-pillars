@@ -3,8 +3,8 @@
 #include <iostream>
 #include <math.h>
 
-#include <marker_publisher/Detection3D.h>
-#include <marker_publisher/Detection3DArray.h>
+#include <rviz_detections/Detection3D.h>
+#include <rviz_detections/Detection3DArray.h>
 
 
 LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node config, std::string pfe_file, std::string backbone_file)
@@ -26,7 +26,7 @@ LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node con
     nh.param<double>("loop_rate_hz",  loop_rate_hz_, 40.0);
 
     // Publisher for lidar detections
-    detection_pub_ = nh_.advertise<marker_publisher::Detection3DArray>(detection_topic, 5);
+    detection_pub_ = nh_.advertise<rviz_detections::Detection3DArray>(detection_topic, 5);
 }
 
 // A helper function that gives quaternion orientation from yaw (euler angle). 
@@ -92,11 +92,11 @@ int LidarNode::detect(float* const pPoints, size_t in_num_points, std::vector<fl
 
 void LidarNode::publishDetectionMsg(std::vector<float>& out_detections, std::vector<int>& out_labels, std::vector<float>& out_scores)
 {
-    marker_publisher::Detection3DArray detection_array;
+    rviz_detections::Detection3DArray detection_array;
     for (size_t i = 0; i < out_detections.size() / 7; i++)
     {
         // boxes: (n,7) np.array = n*7  ( x, y, z, dx, dy, dz, yaw)   
-        marker_publisher::Detection3D detection;
+        rviz_detections::Detection3D detection;
         size_t j = i*7; // packed data width is 7
         detection.pose.position.x = out_detections[j];
         detection.pose.position.y = out_detections[j+1];
