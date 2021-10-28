@@ -3,8 +3,8 @@
 #include <iostream>
 #include <math.h>
 
-#include <rviz_detections/Detection3D.h>
-#include <rviz_detections/Detection3DArray.h>
+#include "rviz_detections/Detection3D.h"
+#include "rviz_detections/Detection3DArray.h"
 
 
 LidarNode::LidarNode(const ros::NodeHandle& nh, const bool debug, YAML::Node config, std::string pfe_file, std::string backbone_file)
