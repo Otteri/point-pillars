@@ -10,8 +10,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rviz_detections</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
   <depend>message_filters</depend>
+  <depend>rviz_detections</depend>
 </package>
