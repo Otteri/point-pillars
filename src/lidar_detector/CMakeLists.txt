@@ -43,10 +43,9 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     rviz_detections
 )
 
-find_package(catkin REQUIRED COMPONENTS
-  ${${PROJECT_NAME}_CATKIN_DEPS}
-  roscpp
-)
+find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
+
+include_directories(${catkin_INCLUDE_DIRS})
 
 ## Catkin package definition
 catkin_package(
@@ -54,8 +53,6 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
 )
-
-include_directories(${catkin_INCLUDE_DIRS})
 
 set(src
     main.cc
@@ -73,7 +70,6 @@ target_link_directories(${PROJECT_NAME}
 
 set(PROJECT_LIBS
   ${CUDA_LIBRARIES}
-  #pointpillars
   ${CMAKE_CURRENT_SOURCE_DIR}/../../PointPillars/build/lib/libpointpillars.so
   yaml-cpp
   ${catkin_LIBRARIES}
