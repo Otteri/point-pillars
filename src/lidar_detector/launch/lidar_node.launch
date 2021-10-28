@@ -2,7 +2,7 @@
 
 <launch>
     <!-- Input topics -->
-    <arg name="lidar_topic"                   default="/lidar_points_rectified"/>
+    <arg name="lidar_topic"                   default="/lidar_input_data"/>
 
     <!-- Outputs topics -->
     <arg name="detection_topic"                default="/pointpillar/detections"/>
