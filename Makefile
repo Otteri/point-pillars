@@ -33,6 +33,14 @@ docker-launch-debug: ## Launch interactive debug container
 	--network=host \
 	pointpillars-debug
 
+docker-launch-viz:
+	docker run \
+	-d \
+	--rm \
+	-v `pwd`/config/rviz_detections.launch:/app/install/share/rviz_detections/rviz_detections.launch \
+	--network=host \
+	rviz-detections:latest
+
 build: ## Build all submodules and PointPillars
 	${MAKE} build-spconv
 	${MAKE} build-openpcdet
@@ -101,6 +109,14 @@ test-lidar-detector:
 
 test-lidar-detector-with-text:
 	rostest lidar_detector lidar_node.test --text
+
+deploy:
+	mkdir deploy;\
+	cp Makefile deploy/;\
+	cp -r config/ deploy/;\
+	cp src/rviz_detections/launch/rviz_detections.launch deploy/config/rviz_detections.launch;\
+	docker save -o `pwd`/deploy/pointpillars.tar pointpillars:latest;\
+	docker save -o `pwd`/deploy/rviz-detections.tar rviz-detections:latest
 
 help: ## Display callable targets.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
