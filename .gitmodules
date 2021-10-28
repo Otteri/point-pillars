@@ -3,7 +3,8 @@
 	url = https://github.com/onnx/onnx-tensorrt.git
 [submodule "OpenPCDet"]
 	path = OpenPCDet
-	url = https://github.com/hova88/OpenPCDet.git
+	url = https://github.com/Otteri/OpenPCDet.git
+    branch = pointpillars
 [submodule "spconv"]
 	path = spconv
 	url = https://github.com/traveller59/spconv.git
