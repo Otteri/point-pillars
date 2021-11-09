@@ -18,7 +18,7 @@ docker-launch: ## Launch pointpillars application container
 	pointpillars:latest
 
 docker-build-dev: ## Build development docker image
-	docker build --target debug-stage -t pointpillars-dev .
+	docker build --target development-stage -t pointpillars-dev .
 
 docker-launch-dev: ## Launch interactive debug container
 	docker run \
