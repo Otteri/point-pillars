@@ -1,15 +1,15 @@
 [submodule "onnx-tensorrt"]
-	path = onnx-tensorrt
+	path = third_party/onnx-tensorrt
 	url = https://github.com/onnx/onnx-tensorrt.git
 [submodule "OpenPCDet"]
 	path = OpenPCDet
 	url = https://github.com/Otteri/OpenPCDet.git
     branch = pointpillars
 [submodule "spconv"]
-	path = spconv
+	path = third_party/spconv
 	url = https://github.com/traveller59/spconv.git
 [submodule "TensorRT"]
-	path = TensorRT
+	path = third_party/TensorRT
 	url = https://github.com/nvidia/TensorRT
 [submodule "third_party/googletest"]
 	path = third_party/googletest

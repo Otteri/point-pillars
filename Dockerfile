@@ -1,6 +1,6 @@
 ###################################################################
 # Author: Joni Airaksinen (Otteri)
-# Build: $ docker build -f Dockerfile -t pointpillars .
+# Build: $ docker build -t pointpillars:latest .
 # Run:   $ docker run --gpus all --rm -it \
 #          -v `pwd`/config:/app/config/ --network=host pointpillars
 #
@@ -43,18 +43,13 @@ RUN mkdir cmake && cd cmake \
     && make -j$(nproc) \
     && make install
 
-# Common python tools
-RUN python3 -m pip install --upgrade pip && pip3 install --no-cache-dir \
-    pathlib \
-    wheel
-
 # Install needed python packages
 COPY requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN python3 -m pip install --upgrade pip && pip install -r /app/requirements.txt
 
 # Copy Nvidia sources
-COPY onnx-tensorrt /app/onnx-tensorrt/
-COPY TensorRT /app/TensorRT/
+COPY third_party/onnx-tensorrt /app/onnx-tensorrt/
+COPY third_party/TensorRT /app/TensorRT/
 
 # Install cudnn8, because TensorRT build requires it,
 # but we want to still use cudnn7 with spconv
@@ -65,6 +60,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # First get the TensorRT binary release
 ARG TENSORRT
 COPY ${TENSORRT} /app/
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/TensorRT-7.1.3.4/lib
 RUN tar -xvzf /app/TensorRT-7.1.3.4.Ubuntu-18.04.x86_64-gnu.cuda-10.2.cudnn8.0.tar.gz -C /app/ \
     && rm /app/TensorRT-7.1.3.4.Ubuntu-18.04.x86_64-gnu.cuda-10.2.cudnn8.0.tar.gz \
     && export TRT_RELEASE=/app/TensorRT-7.1.3.4 \
@@ -75,17 +71,13 @@ RUN tar -xvzf /app/TensorRT-7.1.3.4.Ubuntu-18.04.x86_64-gnu.cuda-10.2.cudnn8.0.t
     && cmake .. -DTRT_LIB_DIR=$TRT_RELEASE/lib -DTRT_OUT_DIR=`pwd`/out -DCUDA_VERSION=10.2 \
     && make -j$(nproc)
 
-# Build protobuf system wide (TensoRT and onnx-tensorrt dependency)
-# We can use the version in TensorRT/third_party, so we don't need to
-# duplicate the repo ourselves and this also ensures that we use good version
-RUN cd /app/TensorRT/third_party/protobuf \
-    && ./autogen.sh \
+# Install protobuf, onnx-tensort needs it
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.8.0/protobuf-cpp-3.8.0.tar.gz \
+    && tar -xzvf protobuf-cpp-3.8.0.tar.gz \
+    && cd protobuf-3.8.0 \
     && ./configure \
     && make -j$(nproc) \
-    && make check \
     && make install \
-    && cp /app/TensorRT-7.1.3.4/include/* /usr/include/ \
-    && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/TensorRT-7.1.3.4/lib \
     && ldconfig
 
 # Build onnx-tenssort, so we can generate trt-models
@@ -106,35 +98,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends ros-melodic-ros
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 RUN apt update && apt install -y --no-install-recommends python3-catkin-tools
 
-# Copy project related sources
-COPY OpenPCDet /app/OpenPCDet/
-COPY spconv /app/spconv/
-COPY Makefile /app/Makefile
+# [Spconv]
+COPY third_party/spconv /app/spconv/
 
-# Run separately for better caching
-RUN cd /app && make build-spconv
-
-# For some reason OpenPCDet needs .git:
+# [OpenPCDet]
+# Building this requires dirty tricks.
+# Copy .git, because for some reason it is needed:
 # /app/OpenPCDet/tools/onnx_utils# python3 trans_pfe.py
 # fatal: not a git repository: /app/OpenPCDet/../.git/modules/OpenPCDet
+#
+# Make CUDA detectable, otherwise we get following error while building openpcdet:
+# Found no NVIDIA driver on your system. Please check that you
+# have an NVIDIA GPU and installed a driver from...
+COPY OpenPCDet /app/OpenPCDet/
 COPY .git /app/.git/
+ENV TORCH_CUDA_ARCH_LIST=Turing
 
-# AS a last thing, the project
-# So when we do changes here, we need to redo only one layer
+# Then start building with instructions given in the Makefile
+COPY Makefile /app/Makefile
+RUN cd /app && make build-spconv
+RUN cd /app && make build-openpcdet
+
+# Finally, move on to the Pointpillars project itself
 COPY src /app/src/
 COPY PointPillars /app/PointPillars/
 
-
 ################################################################################
-FROM dependency-stage as debug-stage
+FROM dependency-stage as development-stage
 
 # Build pointpillars library
 RUN /bin/bash -c "cd /app/PointPillars/ && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && \
-    make -j$(nproc) && \
-    make install"
+    make -j$(nproc)"
 
 # Build ROS detector
 RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
@@ -144,7 +141,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
 
 WORKDIR /app
-
 
 ################################################################################
 FROM dependency-stage as release-stage
@@ -163,7 +159,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     catkin config --init --install && \
     catkin clean -yb && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
-
 
 ################################################################################
 FROM ros:melodic-ros-core as production-stage

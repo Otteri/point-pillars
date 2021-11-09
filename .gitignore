@@ -4,9 +4,7 @@ install/
 logs/
 .catkin_tools/
 .vscode/
-
 TensorRT*.tar.gz
-mbilly_msgs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
