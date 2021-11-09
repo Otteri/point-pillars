@@ -30,6 +30,8 @@ docker-launch-debug: ## Launch interactive debug container
 	--rm \
 	-it \
 	-v `pwd`/config:/app/config/ \
+	-v /home/cosmo/data/nuscenes:/app/OpenPCDet/data/nuscenes/ \
+	-v `pwd`/output:/app/OpenPCDet/output/app/config/cbgs_pp_multihead/default/ \
 	--network=host \
 	pointpillars-debug
 
@@ -93,12 +95,13 @@ generate-onnx: ## Converts Pytorch model to ONNX
 
 # https://github.com/hova88/OpenPCDet#changelog
 generate-trt: ## Converts ONNX model to TensorRT
-	cd ./model; \
+	cd ./config; \
 	onnx2trt cbgs_pp_multihead_pfe.onnx -o cbgs_pp_multihead_pfe.trt -b 1 -d 16; \
     onnx2trt cbgs_pp_multihead_backbone.onnx -o cbgs_pp_multihead_backbone.trt -b 1 -d 16
 
 build-lidar-detector:
 	catkin clean -yb; \
+
 	make clean-pointpillars; \
 	make build-pointpillars; \
 	catkin build --cmake-args -DTENSORRT_ROOT=${TENSORRT_ROOT} -DCMAKE_BUILD_TYPE=Release
