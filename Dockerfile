@@ -43,11 +43,6 @@ RUN mkdir cmake && cd cmake \
     && make -j$(nproc) \
     && make install
 
-# Common python tools
-# RUN python3 -m pip install --upgrade pip && pip3 install --no-cache-dir \
-#     pathlib \
-#     wheel
-
 # Install needed python packages
 COPY requirements.txt /app/requirements.txt
 RUN python3 -m pip install --upgrade pip && pip install -r /app/requirements.txt
@@ -129,15 +124,14 @@ COPY src /app/src/
 COPY PointPillars /app/PointPillars/
 
 ################################################################################
-FROM dependency-stage as debug-stage
+FROM dependency-stage as development-stage
 
 # Build pointpillars library
 RUN /bin/bash -c "cd /app/PointPillars/ && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && \
-    make -j$(nproc) && \
-    make install"
+    make -j$(nproc)"
 
 # Build ROS detector
 RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
@@ -147,7 +141,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
 
 WORKDIR /app
-
 
 ################################################################################
 FROM dependency-stage as release-stage
@@ -166,7 +159,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
     catkin config --init --install && \
     catkin clean -yb && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
-
 
 ################################################################################
 FROM ros:melodic-ros-core as production-stage

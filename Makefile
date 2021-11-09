@@ -4,10 +4,6 @@ TENSORRT_ROOT := $(or $(TENSORRT_ROOT),/app/TensorRT-7.1.3.4)
 setup: ## Setup environment
 	git submodule update --recursive --init
 
-docker-setup:
-	cp ${TENSORRT_ROOT}/include/* /usr/include/
-	export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TENSORRT_ROOT}/lib
-
 docker-build: ## Build production image
 	docker build --target production-stage -t pointpillars:latest .
 
@@ -21,10 +17,10 @@ docker-launch: ## Launch pointpillars application container
 	--network=host \
 	pointpillars:latest
 
-docker-build-debug: ## Build debug docker image
-	docker build --target debug-stage -t pointpillars-debug .
+docker-build-dev: ## Build development docker image
+	docker build --target debug-stage -t pointpillars-dev .
 
-docker-launch-debug: ## Launch interactive debug container
+docker-launch-dev: ## Launch interactive debug container
 	docker run \
 	--gpus all \
 	--rm \
@@ -33,7 +29,7 @@ docker-launch-debug: ## Launch interactive debug container
 	-v /home/cosmo/data/nuscenes:/app/OpenPCDet/data/nuscenes/ \
 	-v `pwd`/output:/app/OpenPCDet/output/app/config/cbgs_pp_multihead/default/ \
 	--network=host \
-	pointpillars-debug
+	pointpillars-dev
 
 docker-launch-viz:
 	docker run \
@@ -42,11 +38,6 @@ docker-launch-viz:
 	-v `pwd`/config/rviz_detections.launch:/app/install/share/rviz_detections/rviz_detections.launch \
 	--network=host \
 	rviz-detections:latest
-
-build: ## Build all submodules and PointPillars
-	${MAKE} build-spconv
-	${MAKE} build-openpcdet
-	${MAKE} build-pointpillars
 
 # https://github.com/google/googletest/blob/release-1.11.0/googletest/README.md
 build-googletest:
@@ -100,10 +91,6 @@ generate-trt: ## Converts ONNX model to TensorRT
     onnx2trt cbgs_pp_multihead_backbone.onnx -o cbgs_pp_multihead_backbone.trt -b 1 -d 16
 
 build-lidar-detector:
-	catkin clean -yb; \
-
-	make clean-pointpillars; \
-	make build-pointpillars; \
 	catkin build --cmake-args -DTENSORRT_ROOT=${TENSORRT_ROOT} -DCMAKE_BUILD_TYPE=Release
 
 test-lidar-detector:
