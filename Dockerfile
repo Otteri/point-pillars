@@ -1,6 +1,6 @@
 ###################################################################
 # Author: Joni Airaksinen (Otteri)
-# Build: $ docker build -f Dockerfile -t pointpillars .
+# Build: $ docker build -t pointpillars:latest .
 # Run:   $ docker run --gpus all --rm -it \
 #          -v `pwd`/config:/app/config/ --network=host pointpillars
 #
@@ -44,17 +44,17 @@ RUN mkdir cmake && cd cmake \
     && make install
 
 # Common python tools
-RUN python3 -m pip install --upgrade pip && pip3 install --no-cache-dir \
-    pathlib \
-    wheel
+# RUN python3 -m pip install --upgrade pip && pip3 install --no-cache-dir \
+#     pathlib \
+#     wheel
 
 # Install needed python packages
 COPY requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN python3 -m pip install --upgrade pip && pip install -r /app/requirements.txt
 
 # Copy Nvidia sources
-COPY onnx-tensorrt /app/onnx-tensorrt/
-COPY TensorRT /app/TensorRT/
+COPY third_party/onnx-tensorrt /app/onnx-tensorrt/
+COPY third_party/TensorRT /app/TensorRT/
 
 # Install cudnn8, because TensorRT build requires it,
 # but we want to still use cudnn7 with spconv
@@ -104,7 +104,7 @@ RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 RUN apt update && apt install -y --no-install-recommends python3-catkin-tools
 
 # [Spconv]
-COPY spconv /app/spconv/
+COPY third_party/spconv /app/spconv/
 
 # [OpenPCDet]
 # Building this requires dirty tricks.
