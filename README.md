@@ -1,6 +1,8 @@
 # point-pillars
 A fast PointPillar-Multihead lidar detector
 
+![PointPillars](./images/pointpillars.png)
+
 ## Short guide
 1. `$ make setup` to clone submodules
 2. Download TensorRT-7.1 GA and place to repo root
@@ -150,3 +152,10 @@ by system if you don't provide enough RAM memory.
 - Get rid of symlink step in training
 - Update this readme and paths
 - Fix evaluation script with multiple checkpoints
+
+### References:
+- https://github.com/hova88/PointPillars_MultiHead_40FPS
+- https://github.com/open-mmlab/OpenPCDet
+- https://github.com/onnx/onnx-tensorrt
+- https://github.com/NVIDIA/TensorRT
+- https://github.com/traveller59/spconv
