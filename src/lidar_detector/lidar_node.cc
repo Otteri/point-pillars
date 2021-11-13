@@ -43,36 +43,23 @@ geometry_msgs::Quaternion getOrientation(float yaw)
     return q;
 }
 
+// Map labels that the model is capable of detecting (see: cbgs_pp_multihead.yaml)
+// All possible labels are listed here: https://github.com/nutonomy/nuscenes-devkit/blob/master/docs/instructions_nuscenes.md
 std::string intLabelToString(int label)
 {
     switch (label)
     {
-    case 0: return "(0)"; // Car
-    case 1: return "(1)"; // Truck
-    case 2: return "(2)"; // Bus
-    case 3: return "(3)"; // Bus
-    case 4: return "(4)"; // Construction vehicle
-    case 5: return "(5)"; // Motorcycle
-    case 6: return "(6)"; // Bicycle
-    case 7: return "(7)"; // bicycle rack
-    case 8: return "(8)"; // Trailer
-    case 9: return "(9)"; // police
-    case 10: return "(10)"; // ambulance
-    case 11: return "(11)"; // adult
-    case 12: return "(12)"; // child
-    case 13: return "(13)"; // construction worker
-    case 14: return "(14)"; // Stroller: 
-    case 15: return "(15)"; // Wheelchair: 
-    case 16: return "(16)"; // Portable Personal Mobility Vehicle: A 
-    case 17: return "(17)"; // Police Officer: 
-
-    case 18: return "(18)";
-    case 19: return "(19)";
-    case 20: return "(20)";
-    case 21: return "(21)";
-    case 22: return "(22)";
-    case 23: return "(23)";
-    default: return "Unknown";
+        case 0: return "Car";
+        case 1: return "Truck";
+        case 2: return "Construction vehicle";
+        case 3: return "Bus";
+        case 4: return "Trailer";
+        case 5: return "Barrier";
+        case 6: return "Motorcycle";
+        case 7: return "Bicycle";
+        case 8: return "Pedestrian";
+        case 9: return "Traffic cone";
+        default: return "Unknown";
     }
 }
 
@@ -93,6 +80,7 @@ int LidarNode::detect(float* const pPoints, size_t in_num_points, std::vector<fl
 void LidarNode::publishDetectionMsg(std::vector<float>& out_detections, std::vector<int>& out_labels, std::vector<float>& out_scores)
 {
     rviz_detections::Detection3DArray detection_array;
+
     for (size_t i = 0; i < out_detections.size() / 7; i++)
     {
         // boxes: (n,7) np.array = n*7  ( x, y, z, dx, dy, dz, yaw)   

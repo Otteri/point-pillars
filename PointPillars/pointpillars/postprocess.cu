@@ -229,7 +229,7 @@ __global__ void sort_boxes_by_indexes_kernel(float* filtered_box, float* filtere
     const int num_output_box_feature)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    if(tid < filter_count)  {
+    if (tid < filter_count) {
 
         int sort_index = indexes[tid];
         sorted_filtered_boxes[tid * num_output_box_feature + 0] = filtered_box[sort_index * num_output_box_feature + 0];
@@ -240,7 +240,6 @@ __global__ void sort_boxes_by_indexes_kernel(float* filtered_box, float* filtere
         sorted_filtered_boxes[tid * num_output_box_feature + 5] = filtered_box[sort_index * num_output_box_feature + 5];
         sorted_filtered_boxes[tid * num_output_box_feature + 6] = filtered_box[sort_index * num_output_box_feature + 6];
 
-        // sorted_filtered_dir[tid] = filtered_dir[sort_index];
         sorted_filtered_scores[tid] = filtered_scores[sort_index];
     }
 }
@@ -372,7 +371,6 @@ void PostprocessCuda::DoPostprocessCuda(
             out_detection.emplace_back(host_filtered_box[keep_inds[i] * num_output_box_feature_ + 6]);
             out_score.emplace_back(host_filtered_scores[keep_inds[i]]);
             out_label.emplace_back(i);
-
         }
         delete[] keep_inds;
         delete[] host_filtered_scores;
