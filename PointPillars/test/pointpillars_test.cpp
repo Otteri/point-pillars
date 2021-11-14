@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 // headers in 3rd-part
-#include "../pointpillars/pointpillars.h"
+#include "../pointpillars/pointpillars.hpp"
 #include "gtest/gtest.h"
 using namespace std;
 

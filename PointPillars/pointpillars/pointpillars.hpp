@@ -62,11 +62,11 @@
 
 // headers in local files
 // #include "params.h"
-#include "common.h"
+#include "common.hpp"
 #include <yaml-cpp/yaml.h>
-#include "preprocess.h"
-#include "scatter.h"
-#include "postprocess.h"
+#include "preprocess.hpp"
+#include "scatter.hpp"
+#include "postprocess.hpp"
 
 using namespace std;
 

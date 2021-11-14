@@ -55,9 +55,9 @@ catkin_package(
 )
 
 set(src
-    main.cc
-    lidar_node.cc
-    pclbuff.cc
+    main.cpp
+    lidar_node.cpp
+    pclbuff.cpp
 )
 
 add_executable(${PROJECT_NAME} ${src})

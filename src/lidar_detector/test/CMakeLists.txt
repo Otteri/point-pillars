@@ -14,7 +14,7 @@ add_rostest_gtest(
     pclbuff_test.cpp
 
     #
-    ../pclbuff.cc
+    ../pclbuff.cpp
 )
 
 target_link_libraries(lidar_node_tester ${PROJECT_LIBS})

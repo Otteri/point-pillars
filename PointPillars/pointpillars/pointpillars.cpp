@@ -44,7 +44,7 @@
 
 
 
-#include "pointpillars.h"
+#include "pointpillars.hpp"
 
 #include <chrono>
 #include <iostream>

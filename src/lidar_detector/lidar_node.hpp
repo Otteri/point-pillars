@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ros/ros.h>
-#include "pointpillars/pointpillars.h"
+#include "pointpillars/pointpillars.hpp"
 
 class LidarNode
 {

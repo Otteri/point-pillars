@@ -11,8 +11,8 @@ All Rights Reserved 2019-2020.
 */
 
 #include <stdio.h>
-#include "nms.h"
-#include "common.h"
+#include "nms.hpp"
+#include "common.hpp"
 #define THREADS_PER_BLOCK 16
 #define DIVUP(m, n) ((m) / (n) + ((m) % (n) > 0))
 

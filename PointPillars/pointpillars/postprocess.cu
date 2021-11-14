@@ -46,8 +46,8 @@
 #include <thrust/sort.h>
 
 // headers in local files
-#include "common.h"
-#include "postprocess.h"
+#include "common.hpp"
+#include "postprocess.hpp"
 #include <stdio.h>
 
 

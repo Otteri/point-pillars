@@ -44,7 +44,7 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "nms.h"
+#include "nms.hpp"
 
 class PostprocessCuda {
  private:

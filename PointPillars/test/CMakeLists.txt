@@ -6,8 +6,8 @@ include_directories(
 )
 
 set(test_src
-  run_all.cc
-  pointpillars_test.cc
+  run_all.cpp
+  pointpillars_test.cpp
 )
 
 add_executable(test_model ${test_src})
