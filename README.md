@@ -33,7 +33,7 @@ Note: it is better to duplicate `yaml` files to `config` directory and use these
 Setup the repository by calling `make setup`.
 This downloads submodules to your computer, so docker build doesn't need to always clone them from remotes.
 
-Then, download [TensorRT 7.1.3.4 GA](https://developer.nvidia.com/nvidia-tensorrt-7x-download) (Ubuntu 1804 CUDA 10.2) TAR package and place
+Then, download [TensorRT 8.0.1 GA](https://developer.nvidia.com/nvidia-tensorrt-8x-download) TAR package and place
 it into the root of this repository, which allows docker to find it.
 This must be done manually, because downloading requires personal nvidia account. File is placed to the repository root, so it exists inside the docker build context.
 
