@@ -79,24 +79,23 @@ RUN tar -xvzf /app/TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz -
     && mkdir -p build && cd build \
     && cmake .. -DTRT_LIB_DIR=$TRT_LIBPATH -DTRT_OUT_DIR=`pwd`/out \
     && make -j$(nproc)
-    # Do make install?
 
-# # Install protobuf, onnx-tensort needs it
-# RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.8.0/protobuf-cpp-3.8.0.tar.gz \
-#     && tar -xzvf protobuf-cpp-3.8.0.tar.gz \
-#     && cd protobuf-3.8.0 \
-#     && ./configure \
-#     && make -j$(nproc) \
-#     && make install \
-#     && ldconfig
+# Install protobuf, onnx-tensort needs it
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.8.0/protobuf-cpp-3.8.0.tar.gz \
+    && tar -xzvf protobuf-cpp-3.8.0.tar.gz \
+    && cd protobuf-3.8.0 \
+    && ./configure \
+    && make -j$(nproc) \
+    && make install \
+    && ldconfig
 
-# should be installed already with tensoRT - not needed?
-# # Build onnx-tenssort, so we can generate trt-models
-# RUN cd /app/onnx-tensorrt \
-# 	&& mkdir build && cd build \
-# 	&& cmake .. -DTENSORRT_ROOT=/app/TensorRT-8.0.1.6 && make -j$(nproc) \
-# 	&& export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH \
-#     && make install
+# Build onnx-tenssort, so we can generate trt-models
+RUN cd /app/onnx-tensorrt \
+	&& mkdir build && cd build \
+	&& cmake .. -DTENSORRT_ROOT=/app/TensorRT-8.0.3.4 \
+    && make -j$(nproc) \
+	&& export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH \
+    && make install
 
 # Install ROS noetic on Ubuntu (http://wiki.ros.org/noetic/Installation/Ubuntu)
 #RUN /bin/sh -c echo 'Etc/UTC' > /etc/timezone &&     ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &&     apt-get update &&     apt-get install -q -y --no-install-recommends tzdata &&     rm -rf /var/lib/apt/lists/*
@@ -146,53 +145,53 @@ RUN /bin/bash -c "cd /app/PointPillars/ && \
     cmake .. -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-8.0.3.4 && \
     make -j$(nproc)"
 
-# # Build ROS detector
-# RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
-#     cd /app && \
-#     catkin config --init --install && \
-#     catkin clean -yb && \
-#     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-8.0.3.4"
+# Build ROS detector
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.sh && \
+    cd /app && \
+    catkin config --init --install && \
+    catkin clean -yb && \
+    catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DTENSORRT_ROOT=/app/TensorRT-8.0.3.4"
 
 WORKDIR /app
 
-# ################################################################################
-# FROM dependency-stage as release-stage
+################################################################################
+FROM dependency-stage as release-stage
 
-# # Build pointpillars library
-# RUN /bin/bash -c "cd /app/PointPillars/ && \
-#     mkdir build && \
-#     cd build && \
-#     cmake .. -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4 && \
-#     make -j$(nproc) && \
-#     make install"
+# Build pointpillars library
+RUN /bin/bash -c "cd /app/PointPillars/ && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-8.0.3.4 && \
+    make -j$(nproc) && \
+    make install"
 
-# # Build ROS detector
-# RUN /bin/bash -c "source /opt/ros/melodic/setup.sh && \
-#     cd /app && \
-#     catkin config --init --install && \
-#     catkin clean -yb && \
-#     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-7.1.3.4"
+# Build ROS detector
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.sh && \
+    cd /app && \
+    catkin config --init --install && \
+    catkin clean -yb && \
+    catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release -DTENSORRT_ROOT=/app/TensorRT-8.0.3.4"
 
-# ################################################################################
-# FROM ros:melodic-ros-core as production-stage
+################################################################################
+FROM ros:noetic-ros-core as production-stage
 
-# # Copy needed libraries and binaries for running the app
-# COPY --from=release-stage /app/install/ /app/install/
-# COPY --from=dependency-stage /usr/local/cuda/bin /usr/local/cuda/bin
-# COPY --from=dependency-stage /usr/local/cuda/lib64 /usr/local/cuda/lib64
-# COPY --from=dependency-stage /app/TensorRT-7.1.3.4/lib /app/TensorRT-7.1.3.4/lib
-# COPY --from=dependency-stage /app/TensorRT-7.1.3.4/bin /app/TensorRT-7.1.3.4/bin
+# Copy needed libraries and binaries for running the app
+COPY --from=release-stage /app/install/ /app/install/
+COPY --from=dependency-stage /usr/local/cuda/bin /usr/local/cuda/bin
+COPY --from=dependency-stage /usr/local/cuda/lib64 /usr/local/cuda/lib64
+COPY --from=dependency-stage /app/TensorRT-8.0.3.4/lib /app/TensorRT-8.0.3.4/lib
+COPY --from=dependency-stage /app/TensorRT-8.0.3.4/bin /app/TensorRT-8.0.3.4/bin
 
-# COPY --from=dependency-stage \
-#     /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.5 \
-#     /usr/lib/x86_64-linux-gnu/libcublas.so.10 \
-#     /usr/lib/x86_64-linux-gnu/libcudnn.so.8 \
-#     /usr/lib/x86_64-linux-gnu/libcublasLt.so.10 \
-#     /usr/lib/x86_64-linux-gnu/libcudnn_ops_infer.so.8 \
-#     /usr/lib/x86_64-linux-gnu/libcudnn_cnn_infer.so.8 \
-#     /usr/lib/x86_64-linux-gnu/
+COPY --from=dependency-stage \
+    /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.6 \
+    /usr/lib/x86_64-linux-gnu/libcudnn.so.8 \
+    #/usr/lib/x86_64-linux-gnu/libcublas.so.10 \
+    #/usr/lib/x86_64-linux-gnu/libcublasLt.so.10 \
+    /usr/lib/x86_64-linux-gnu/libcudnn_ops_infer.so.8 \
+    /usr/lib/x86_64-linux-gnu/libcudnn_cnn_infer.so.8 \
+    /usr/lib/x86_64-linux-gnu/
 
-# ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/app/TensorRT-7.1.3.4/lib:/usr/local/cuda/lib64"
-# ENV PATH=${PATH}:/usr/local/cuda/bin
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/app/TensorRT-8.0.3.4/lib:/usr/local/cuda/lib64"
+ENV PATH=${PATH}:/usr/local/cuda/bin
 
-# ENTRYPOINT bash -c "cd /app/ && source install/setup.bash && roslaunch lidar_detector lidar_node.launch"
+ENTRYPOINT bash -c "cd /app/ && source install/setup.bash && roslaunch lidar_detector lidar_node.launch"
