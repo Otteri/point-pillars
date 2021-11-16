@@ -6,7 +6,7 @@ Real-time PointPillar-Multihead lidar detector with a ROS wrapper code. The GIF 
 
 ## Brief guide
 1. `$ make setup` to clone submodules
-2. Download TensorRT-7.1 GA and place to repo root
+2. Download TensorRT-8.0 GA and place to repo root
 3. `$ make docker-build`  
 4. Obtain trained model and place to `config/`
 5. Check configurations (`.yaml` and `.launch` files)
@@ -20,7 +20,7 @@ Detector should be running now.
 ├── OpenPCDet
 ├── PointPillars
 ├── src
-├── TensorRT-7.1.3.4.Ubuntu-18.04.x86_64-gnu.cuda-10.2.cudnn8.0.tar.gz
+├── TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz
 └── third_party
 ```
 
@@ -33,8 +33,7 @@ Note: it is better to duplicate `yaml` files to `config` directory and use these
 Setup the repository by calling `make setup`.
 This downloads submodules to your computer, so docker build doesn't need to always clone them from remotes.
 
-Then, download [TensorRT 8.0.1 GA](https://developer.nvidia.com/nvidia-tensorrt-8x-download) TAR package and place
-it into the root of this repository, which allows docker to find it.
+Then, download [TensorRT 8.0.3 GA Update 1](https://developer.nvidia.com/nvidia-tensorrt-8x-download) TAR package and place it into the root of this repository, which allows docker to find it.
 This must be done manually, because downloading requires personal nvidia account. File is placed to the repository root, so it exists inside the docker build context.
 
 - Download pretrained [pytorch model](https://drive.google.com/file/d/1p-501mTWsq0G9RzroTWSXreIMyTUUpBM/view?usp=sharing)
@@ -51,7 +50,6 @@ This must be done manually, because downloading requires personal nvidia account
 
 If you want to know how to train a own model, then check the [training.md](training.md). However, it is recommended to start with pretrained one.
 
-
 ## Visualization
 If you want to visualize detections, go to `src/rviz_detections` and build the visualizer image with build command given below. Then, you can launch a container that runs the visualizer node by using given make command in the repository root. 
 ```
@@ -63,19 +61,7 @@ Now, if objects are detected, the visualizer node publishes a corresponding boun
 (You can also visualize single static scheme without ROS.
 Download and install `open3d` and call `make visualize`).
 
-
-### Manual build (not recommended)
-Project is picky about versions. In order to avoid replacing system libraries with older versions, dependencies has to be built from source and their location must be specified manually with environment/build variables.
-
-Many dependencies are included as submodules, so you don't need to go through finding versions that happen to work togehter. First, build all dependencies. You may use existing make command to build these modules from source.
-
-Set `TENSORRT_ROOT`, before building pointpillars. Variable can be set from terminal:
-`export TENSORRT_ROOT=/path/to/TensorRT-7.1.3.4`. Then, build the pointpillars library.
-
-Finally, build ROS detector with `catkin`. You can check `Dockerfile` for guidance.
-
 ### Task list:
-- Update to CUDA 11
 - Get rid of symlink step in training
 - Fix evaluation script with multiple checkpoints
 - Resolve class label and confidence issuess

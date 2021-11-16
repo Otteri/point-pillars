@@ -3,11 +3,8 @@ fire==0.4.0
 flake8==3.9.2
 flake8-import-order==0.18.1
 nuscenes-devkit==1.0.5
-open3d==0.13.0
-protobuf==3.8.0
+#protobuf==3.8.0
 pybind11==2.7.0
-# torch==1.5.0
-# torchvision==0.6.0
 --find-links https://download.pytorch.org/whl/cu113/torch_stable.html
 torch==1.10.0+cu113
 torchvision==0.11.1+cu113
