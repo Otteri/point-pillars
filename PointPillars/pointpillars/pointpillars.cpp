@@ -68,7 +68,7 @@ PointPillars::PointPillars(const float score_threshold,
     DeviceMemoryMalloc();
 
     preprocess_points_cuda_ptr_.reset(new PreprocessPointsCuda(
-        kNumThreads,
+            kNumThreads,
         kMaxNumPillars,
         kMaxNumPointsPerPillar,
         kNumPointFeature,
@@ -332,7 +332,7 @@ void PointPillars::OnnxToTRTModel(
 
     // Build the engine
     builder->setMaxBatchSize(kBatchSize);
-    builder->setHalf2Mode(true);
+    //builder->setHalf2Mode(true);
     nvinfer1::IBuilderConfig* config = builder->createBuilderConfig();
     config->setMaxWorkspaceSize(1 << 25);
     nvinfer1::ICudaEngine* engine =
