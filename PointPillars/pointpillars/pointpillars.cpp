@@ -417,6 +417,7 @@ void PointPillars::DoInference(const float* in_points_array,
           dev_pfe_gather_feature_ );
     cudaDeviceSynchronize();
     auto preprocess_end = std::chrono::high_resolution_clock::now();
+    GPU_CHECK(cudaFree(dev_points))
     // DEVICE_SAVE<float>(dev_pfe_gather_feature_,  kMaxNumPillars * kMaxNumPointsPerPillar * kNumGatherPointFeature  , "0_Model_pfe_input_gather_feature");
 
     // [STEP 3] : pfe forward
